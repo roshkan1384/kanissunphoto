@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="KanissunPhoto - عکاسی حرفه‌ای طبیعت، پرتره، اجتماعی و کودک">
+<title>KanissunPhoto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="bar">
+    <button class="brand" data-nav="#home">Kanissun<span>Photo</span></button>
+    <div class="hc">
+      <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mainNav" aria-label="منو">&#9776;</button>
+      <button class="lang-btn" id="langToggle">English</button>
+    </div>
+    <nav class="main" id="mainNav" aria-label="main"></nav>
+  </div>
+</header>
+
+<main id="app">
+  <p class="muted">در حال بارگذاری…</p>
+</main>
+
+<footer id="footer"></footer>
+
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="viewer">
+  <button class="v-btn v-close" id="vClose" aria-label="close">&times;</button>
+  <button class="v-btn v-prev" id="vPrev" aria-label="prev">&#8249;</button>
+  <button class="v-btn v-next" id="vNext" aria-label="next">&#8250;</button>
+  <div class="v-count" id="vCount"></div>
+  <div class="v-stage">
+    <div class="v-wrap">
+      <img class="v-img" id="vImg" alt="">
+      <div class="glass-wm" id="vWm" aria-hidden="true"><span>KanissunPhoto</span></div>
+    </div>
+  </div>
+  <div class="v-info">
+    <h3 id="vTitle"></h3>
+    <p id="vDesc"></p>
+    <p id="vMeta"></p>
+    <p id="vLic"></p>
+    <p><button class="btn" id="vCopy"></button> <button class="btn" id="vInquire"></button></p>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

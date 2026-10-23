@@ -1,0 +1,9 @@
+{
+  "name": "kanissunphoto",
+  "version": "2.0.0",
+  "private": true,
+  "description": "KanissunPhoto photography portfolio with online management",
+  "dependencies": {
+    "@netlify/blobs": "^8.0.0"
+  }
+}

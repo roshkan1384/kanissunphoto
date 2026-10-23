@@ -1,0 +1,9 @@
+# Pre-launch: keep search engines away from the whole site.
+# When the site goes public, replace this with the Allow version below and add a sitemap line.
+User-agent: *
+Disallow: /
+
+# After launch, use instead:
+# User-agent: *
+# Allow: /
+# Sitemap: https://YOUR-DOMAIN/sitemap.xml
