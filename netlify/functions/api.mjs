@@ -413,7 +413,7 @@ async function translateText(body) {
 }
 
 /* ---------- Router ---------- */
- connectLambda(event);
+
   const q = event.queryStringParameters || {};
   const action = q.action;
   const method = event.httpMethod;
