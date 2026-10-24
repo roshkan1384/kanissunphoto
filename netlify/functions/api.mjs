@@ -51,7 +51,12 @@ const DEFAULT_SETTINGS = {
   }
 };
 
-const store = () => getStore({ name: "kanissun", consistency: "strong" });
+const store = () => getStore({
+  name: "kanissun",
+  siteID: process.env.BLOBS_SITE_ID,
+  token: process.env.BLOBS_TOKEN,
+  consistency: "strong"
+});
 
 const reply = (statusCode, body, extraHeaders = {}) => ({
   statusCode,
