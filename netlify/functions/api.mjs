@@ -1,4 +1,4 @@
-import { getStore, connectLambda } from "@netlify/blobs";
+import { getStore } from "@netlify/blobs";
 import crypto from "node:crypto";
 
 // Netlify function request/response bodies are limited to ~6 MB.
@@ -413,7 +413,7 @@ async function translateText(body) {
 }
 
 /* ---------- Router ---------- */
-
+export const handler = async event => {
   const q = event.queryStringParameters || {};
   const action = q.action;
   const method = event.httpMethod;
