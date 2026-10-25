@@ -482,7 +482,7 @@ function buildNav() {
     </div>`);
   });
   items.push(`<button data-nav="#news">${t("newsTitle")}</button>`);
-  items.push(`<button data-nav="#admin">${t("admin")}</button>`);
+  if (token) items.push(`<button data-nav="#admin">${t("admin")}</button>`); // visible to the admin only
   $("#mainNav").innerHTML = items.join("");
 }
 function applyLang() {
