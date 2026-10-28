@@ -2,7 +2,7 @@
 "use strict";
 
 const API = "/.netlify/functions/api";
-const MAIN_IDS = ["nature", "portrait", "social", "children"];
+const MAIN_IDS = ["nature", "portrait", "social", "children", "latest"];
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
