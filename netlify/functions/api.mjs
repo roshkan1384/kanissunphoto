@@ -51,7 +51,6 @@ const DEFAULT_SETTINGS = {
 latest: [
   { id: "irantribes", fa: "جشنواره اقوام ایران", en: "Iranian Ethnic Festival" }
 ]
-      ]
     }
   }
 };
