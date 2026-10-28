@@ -481,7 +481,7 @@ function buildNav() {
       <div class="menu">${subs.map(s => `<button data-nav="#cat/${id}/${s.id}">${esc(name(s))}</button>`).join("")}</div>
     </div>`);
   });
-  items.push(`<button data-nav="#news">${t("newsTitle")}</button>`);
+if (token) items.push(`<button data-nav="#admin">${t("admin")}</button>`);
   if (token) items.push(`<button data-nav="#admin">${t("admin")}</button>`); // visible to the admin only
   $("#mainNav").innerHTML = items.join("");
 }
