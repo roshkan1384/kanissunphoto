@@ -156,16 +156,51 @@ function parseBody(event) {
 }
 
 /* ---------- Data helpers ---------- */
+
 async function getSettings() {
   const s = await store().get("settings", { type: "json" });
-  if (!s) return structuredClone(DEFAULT_SETTINGS);
+  const saved = s || {};
+  const base = structuredClone(DEFAULT_SETTINGS);
+
+  const categories = {
+    main: [...(saved.categories?.main || base.categories.main)],
+    subs: {
+      ...base.categories.subs,
+      ...(saved.categories?.subs || {})
+    }
+  };
+
+  if (!categories.main.some(m => m.id === "latest")) {
+    categories.main.push({
+      id: "latest",
+      fa: "تازه‌ها",
+      en: "Latest"
+    });
+  }
+
+  if (!Array.isArray(categories.subs.latest)) {
+    categories.subs.latest = [];
+  }
+
+  if (!categories.subs.latest.some(item => item.id === "irantribes")) {
+    categories.subs.latest.push({
+      id: "irantribes",
+      fa: "جشنواره اقوام ایران",
+      en: "Iranian Ethnic Festival"
+    });
+  }
+
   return {
-    ...structuredClone(DEFAULT_SETTINGS),
-    ...s,
-    about: { ...DEFAULT_SETTINGS.about, ...(s.about || {}) },
-    categories: s.categories || structuredClone(DEFAULT_SETTINGS.categories)
+    ...base,
+    ...saved,
+    about: {
+      ...base.about,
+      ...(saved.about || {})
+    },
+    categories
   };
 }
+
 
 function sanitizeMeta(m) {
   const pair = v => ({ fa: str(v?.fa, 300), en: str(v?.en, 300) });
