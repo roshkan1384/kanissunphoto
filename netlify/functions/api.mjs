@@ -6,7 +6,7 @@ import crypto from "node:crypto";
 const MAX_BYTES = 4 * 1024 * 1024;
 const ID_RE = /^[a-f0-9]{16}$/;
 const SUB_ID_RE = /^[a-z0-9]{1,40}$/i;
-const MAIN_IDS = ["nature", "portrait", "social", "children"];
+const MAIN_IDS = ["nature", "portrait", "social", "children", "latest"];
 const TOKEN_HOURS = 12;
 
 const DEFAULT_SETTINGS = {
