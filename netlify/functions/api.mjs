@@ -17,7 +17,8 @@ const DEFAULT_SETTINGS = {
       { id: "nature", fa: "طبیعت", en: "Nature" },
       { id: "portrait", fa: "پرتره", en: "Portrait" },
       { id: "social", fa: "اجتماعی و مستند", en: "Social & Documentary" },
-      { id: "children", fa: "کودک", en: "Children" }
+     { id: "children", fa: "کودک", en: "Children" },
+{ id: "latest", fa: "تازه‌ها", en: "Latest" }
     ],
     subs: {
       nature: [
