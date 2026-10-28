@@ -42,11 +42,15 @@ const DEFAULT_SETTINGS = {
         { id: "issues", fa: "مسائل اجتماعی", en: "Social Issues" },
         { id: "people", fa: "مشاغل و انسان‌ها", en: "People & Occupations" }
       ],
-      children: [
-        { id: "kidportrait", fa: "پرتره کودک", en: "Children's Portraits" },
-        { id: "play", fa: "بازی و شادی", en: "Play & Joy" },
-        { id: "kiddaily", fa: "زندگی روزمره کودک", en: "Children's Daily Life" },
-        { id: "kidnature", fa: "کودکان و طبیعت", en: "Children & Nature" }
+   children: [
+  { id: "kidportrait", fa: "پرتره کودک", en: "Children's Portraits" },
+  { id: "play", fa: "بازی و شادی", en: "Play & Joy" },
+  { id: "kiddaily", fa: "زندگی روزمره کودک", en: "Children's Daily Life" },
+  { id: "kidnature", fa: "کودکان و طبیعت", en: "Children & Nature" }
+],
+latest: [
+  { id: "irantribes", fa: "جشنواره اقوام ایران", en: "Iranian Ethnic Festival" }
+]
       ]
     }
   }
