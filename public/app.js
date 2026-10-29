@@ -2,7 +2,8 @@
 "use strict";
 
 const API = "/.netlify/functions/api";
-const MAIN_IDS = ["nature", "portrait", "social", "children", "latest"];
+const MAIN_IDS = ["nature", "portrait", "social", "children"];
+const mainIds = () => { const l = ((S.categories && S.categories.main) || []).map(m => m.id).filter(Boolean); return l.length ? l : MAIN_IDS; };
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
@@ -44,7 +45,7 @@ const UI = {
     intro_social: "لحظه‌های واقعی زندگی مردم، با نگاهی مستند و بی‌تکلف.",
     intro_children: "کودکی، بازی و شادی؛ لحظه‌هایی که زود می‌گذرند.",
     reorderStart: "ویرایش ترتیب عکس‌ها", reorderDone: "پایان ویرایش ترتیب", reorderHint: "عکس‌ها را بکشید و روی عکسی از همان زیرمجموعه رها کنید.",
-    sure: "تأیید حذف؟", trBtn: "ترجمه خودکار", trFail: "ترجمه انجام نشد. کلید ترجمه روی سرور تنظیم نشده یا اتصال برقرار نیست.", csvShown: "فهرست ساخته شد. اگر فایل دانلود نشد، متن زیر را کپی کنید.", csvCopyHint: "متن زیر را انتخاب و کپی کنید، در Notepad بچسبانید و با پسوند csv ذخیره کنید.", csvHead: "عنوان و کپشن گروهی", csvExport: "خروجی فهرست عکس‌ها (CSV)", csvImport: "ورود فهرست (CSV)", csvDone: "فهرست وارد شد", csvBad: "فایل CSV معتبر نیست", csvHint: "فهرست را دانلود کنید، عنوان و کپشن را در Excel یا Google Sheets تکمیل کنید و دوباره وارد کنید. ستون id را تغییر ندهید.", descEn: "توضیح انگلیسی", keywordsEn: "کلیدواژه‌های انگلیسی (با کاما)", releaseLbl: "رضایت‌نامه (model/guardian release) دارد", relNote: "عکس‌هایی که چهره‌ی کودکان یا افراد را نشان می‌دهند، فقط با رضایت‌نامه‌ی کتبی برای استفاده‌ی تجاری و رسانه‌ای عرضه می‌شوند.", relMissing: "برای این عکس رضایت‌نامه ثبت نشده است؛ استفاده‌ی تجاری یا رسانه‌ای ممکن نیست.", seriesHead: "مجموعه‌ها", seriesAdd: "افزودن مجموعه", seriesIntroLbl: "متن معرفی مجموعه", seriesNone: "بدون مجموعه", copyLink: "کپی لینک عکس", copied: "لینک کپی شد", moreTiles: "بخش‌های دیگر", autoLbl: "خودکار", tilePhotoLbl: "عکس کاشی", statsHead: "ارقام و کارنامه", statValPh: "مثلاً ۵۰۰۰+", statLabelPh: "عنوان کوتاه", statTextPh: "توضیح کوتاه (اختیاری)", newsTitle: "تازه‌ها", newsIntro: "رویدادها، کارگاه‌ها و نمایشگاه‌های پیش‌رو.", newsEmpty: "فعلاً رویدادی برای نمایش نیست.", newsPast: "گذشته", newsPastHead: "رویدادهای گذشته", newsMore: "جزئیات بیشتر", newsAdd: "افزودن رویداد", newsHead: "تازه‌ها و رویدادها", newsTitleLbl: "عنوان رویداد", newsPlace: "مکان", newsText: "شرح رویداد", newsLink: "لینک جزئیات (با https://)", tileNewsSub: "رویدادهای پیش‌رو", hiddenLbl: "مخفی از بازدیدکنندگان", subFilter: "زیرمجموعه", allSubs: "همه زیرمجموعه‌ها", tileHead: "کاشی‌های صفحه اصلی", tileNote: "کاشی‌ها در بخش دسته‌بندی صفحه اصلی نمایش داده می‌شوند. هر کاشی را می‌توانید به یک دسته یا صفحه تغییر دهید.", tileAdd: "افزودن کاشی", tileHomeSub: "نگاهی کلی به کارها", tileAboutSub: "معرفی و زندگی‌نامه", ctaTitle: "آماده همکاری هستید؟", ctaSub: "از طبیعت تا لحظه‌های انسانی، هر جا که نور و احساس باشد.", ctaBtn: "تماس با من", contactHead: "ارتباط با ما", addrHead: "آدرس", hoursHead: "ساعات تماس", socialHead: "شبکه‌ها", phoneLbl: "تلفن", whatsLbl: "واتساپ (شماره با کد کشور، مثل 98912...)", instaLbl: "لینک اینستاگرام", teleLbl: "لینک تلگرام", contactFieldsLbl: "اطلاعات تماس (در پایین همه صفحه‌ها نمایش داده می‌شود)", readMore: "بیشتر درباره من", alignLbl: "تراز متن", align_justify: "دو طرفه", aboutPhotoLbl: "عکس صفحه درباره من", mobileHint: "روی گوشی: با دکمه‌های ↑ ↓ ترتیب را عوض کنید و برای ویرایش عنوان و توضیح، روی عکس بزنید.", trashHead: "سطل بازیافت", trashShow: "نمایش سطل بازیافت", trashEmpty: "سطل بازیافت خالی است.", restoreItem: "بازیابی", purgeItem: "حذف برای همیشه", emptyTrash: "خالی کردن سطل", textLbl: "متن", trashDone: "به عکس‌ها برگشت", backupHead: "پشتیبان‌گیری و بازیابی", backupBtn: "دانلود پشتیبان", chooseBackup: "انتخاب فایل پشتیبان", restoreHint: "بازیابی همه داده‌های فعلی (عکس‌ها، متن‌ها و تنظیمات) را با محتوای فایل پشتیبان جایگزین می‌کند.", restoreGo: "تأیید بازیابی (جایگزینی همه داده‌ها)", restoreDone: "بازیابی انجام شد", backupMade: "فایل پشتیبان ساخته شد", backupBad: "فایل پشتیبان معتبر نیست", close: "بستن", wmLbl: "نمایش واترمارک شیشه‌ای کم‌رنگ وسط عکس‌ها", smartLayout: "چیدمان هوشمند", smartDone: "چیدمان هوشمند اعمال شد", rowsLbl: "ردیف", pageLbl: "صفحه", applyTpl: "اعمال قالب", addPage: "افزودن صفحه", tpl_single: "یک عکس بزرگ", tpl_two: "دو عکس", tpl_three: "سه عکس", tpl_four: "چهار عکس (دو ردیف)", tpl_bigTwo: "یک بزرگ و دو کوچک", tpl_textPhoto: "متن و عکس", pageHLbl: "ارتفاع صفحه (٪ از عرض)", pageHOn: "محدودیت ارتفاع فعال", pageWarn: "{n} مورد بیرون از صفحه است", deleteSub: "حذف این زیرمجموعه", deleteAll: "حذف همه عکس‌ها", deletedAll: "همه عکس‌ها حذف شدند", dupLbl: "تکراری (نادیده گرفته شد)", folderTitle: "آپلود فولدر اصلی", folderHint: "فولدر اصلی را انتخاب کنید. زیرفولدرها باید با نام دسته‌ها یا زیرمجموعه‌ها (فارسی یا انگلیسی) یکی باشند. هر نامی که تطبیق نشود، در پیام نهایی نشان داده می‌شود.", noImages: "هیچ عکسی در این فولدر پیدا نشد.", folderDone: "آپلود فولدر تمام شد", unknownFolders: "نام‌های تطبیق‌نشده", heroEyebrowLbl: "عنوان کوچک بالای هیرو", heroTitleLbl: "عنوان اصلی", heroTextLbl: "متن معرفی", heroPhotoLbl: "عکس‌های اسلایدشو (حداکثر ۴ عکس افقی)",
+    sure: "تأیید حذف؟", addMainHead: "افزودن دسته", addMainBtn: "افزودن دسته", nmFa: "نام فارسی دسته", nmEn: "نام انگلیسی دسته", trBtn: "ترجمه خودکار", trFail: "ترجمه انجام نشد. کلید ترجمه روی سرور تنظیم نشده یا اتصال برقرار نیست.", csvShown: "فهرست ساخته شد. اگر فایل دانلود نشد، متن زیر را کپی کنید.", csvCopyHint: "متن زیر را انتخاب و کپی کنید، در Notepad بچسبانید و با پسوند csv ذخیره کنید.", csvHead: "عنوان و کپشن گروهی", csvExport: "خروجی فهرست عکس‌ها (CSV)", csvImport: "ورود فهرست (CSV)", csvDone: "فهرست وارد شد", csvBad: "فایل CSV معتبر نیست", csvHint: "فهرست را دانلود کنید، عنوان و کپشن را در Excel یا Google Sheets تکمیل کنید و دوباره وارد کنید. ستون id را تغییر ندهید.", descEn: "توضیح انگلیسی", keywordsEn: "کلیدواژه‌های انگلیسی (با کاما)", releaseLbl: "رضایت‌نامه (model/guardian release) دارد", relNote: "عکس‌هایی که چهره‌ی کودکان یا افراد را نشان می‌دهند، فقط با رضایت‌نامه‌ی کتبی برای استفاده‌ی تجاری و رسانه‌ای عرضه می‌شوند.", relMissing: "برای این عکس رضایت‌نامه ثبت نشده است؛ استفاده‌ی تجاری یا رسانه‌ای ممکن نیست.", seriesHead: "مجموعه‌ها", seriesAdd: "افزودن مجموعه", seriesIntroLbl: "متن معرفی مجموعه", seriesNone: "بدون مجموعه", copyLink: "کپی لینک عکس", copied: "لینک کپی شد", moreTiles: "بخش‌های دیگر", autoLbl: "خودکار", tilePhotoLbl: "عکس کاشی", statsHead: "ارقام و کارنامه", statValPh: "مثلاً ۵۰۰۰+", statLabelPh: "عنوان کوتاه", statTextPh: "توضیح کوتاه (اختیاری)", newsTitle: "تازه‌ها", newsIntro: "رویدادها، کارگاه‌ها و نمایشگاه‌های پیش‌رو.", newsEmpty: "فعلاً رویدادی برای نمایش نیست.", newsPast: "گذشته", newsPastHead: "رویدادهای گذشته", newsMore: "جزئیات بیشتر", newsAdd: "افزودن رویداد", newsHead: "تازه‌ها و رویدادها", newsTitleLbl: "عنوان رویداد", newsPlace: "مکان", newsText: "شرح رویداد", newsLink: "لینک جزئیات (با https://)", tileNewsSub: "رویدادهای پیش‌رو", hiddenLbl: "مخفی از بازدیدکنندگان", subFilter: "زیرمجموعه", allSubs: "همه زیرمجموعه‌ها", tileHead: "کاشی‌های صفحه اصلی", tileNote: "کاشی‌ها در بخش دسته‌بندی صفحه اصلی نمایش داده می‌شوند. هر کاشی را می‌توانید به یک دسته یا صفحه تغییر دهید.", tileAdd: "افزودن کاشی", tileHomeSub: "نگاهی کلی به کارها", tileAboutSub: "معرفی و زندگی‌نامه", ctaTitle: "آماده همکاری هستید؟", ctaSub: "از طبیعت تا لحظه‌های انسانی، هر جا که نور و احساس باشد.", ctaBtn: "تماس با من", contactHead: "ارتباط با ما", addrHead: "آدرس", hoursHead: "ساعات تماس", socialHead: "شبکه‌ها", phoneLbl: "تلفن", whatsLbl: "واتساپ (شماره با کد کشور، مثل 98912...)", instaLbl: "لینک اینستاگرام", teleLbl: "لینک تلگرام", contactFieldsLbl: "اطلاعات تماس (در پایین همه صفحه‌ها نمایش داده می‌شود)", readMore: "بیشتر درباره من", alignLbl: "تراز متن", align_justify: "دو طرفه", aboutPhotoLbl: "عکس صفحه درباره من", mobileHint: "روی گوشی: با دکمه‌های ↑ ↓ ترتیب را عوض کنید و برای ویرایش عنوان و توضیح، روی عکس بزنید.", trashHead: "سطل بازیافت", trashShow: "نمایش سطل بازیافت", trashEmpty: "سطل بازیافت خالی است.", restoreItem: "بازیابی", purgeItem: "حذف برای همیشه", emptyTrash: "خالی کردن سطل", textLbl: "متن", trashDone: "به عکس‌ها برگشت", backupHead: "پشتیبان‌گیری و بازیابی", backupBtn: "دانلود پشتیبان", chooseBackup: "انتخاب فایل پشتیبان", restoreHint: "بازیابی همه داده‌های فعلی (عکس‌ها، متن‌ها و تنظیمات) را با محتوای فایل پشتیبان جایگزین می‌کند.", restoreGo: "تأیید بازیابی (جایگزینی همه داده‌ها)", restoreDone: "بازیابی انجام شد", backupMade: "فایل پشتیبان ساخته شد", backupBad: "فایل پشتیبان معتبر نیست", close: "بستن", wmLbl: "نمایش واترمارک شیشه‌ای کم‌رنگ وسط عکس‌ها", smartLayout: "چیدمان هوشمند", smartDone: "چیدمان هوشمند اعمال شد", rowsLbl: "ردیف", pageLbl: "صفحه", applyTpl: "اعمال قالب", addPage: "افزودن صفحه", tpl_single: "یک عکس بزرگ", tpl_two: "دو عکس", tpl_three: "سه عکس", tpl_four: "چهار عکس (دو ردیف)", tpl_bigTwo: "یک بزرگ و دو کوچک", tpl_textPhoto: "متن و عکس", pageHLbl: "ارتفاع صفحه (٪ از عرض)", pageHOn: "محدودیت ارتفاع فعال", pageWarn: "{n} مورد بیرون از صفحه است", deleteSub: "حذف این زیرمجموعه", deleteAll: "حذف همه عکس‌ها", deletedAll: "همه عکس‌ها حذف شدند", dupLbl: "تکراری (نادیده گرفته شد)", folderTitle: "آپلود فولدر اصلی", folderHint: "فولدر اصلی را انتخاب کنید. زیرفولدرها باید با نام دسته‌ها یا زیرمجموعه‌ها (فارسی یا انگلیسی) یکی باشند. هر نامی که تطبیق نشود، در پیام نهایی نشان داده می‌شود.", noImages: "هیچ عکسی در این فولدر پیدا نشد.", folderDone: "آپلود فولدر تمام شد", unknownFolders: "نام‌های تطبیق‌نشده", heroEyebrowLbl: "عنوان کوچک بالای هیرو", heroTitleLbl: "عنوان اصلی", heroTextLbl: "متن معرفی", heroPhotoLbl: "عکس‌های اسلایدشو (حداکثر ۴ عکس افقی)",
     undo: "بازگشت", undone: "تغییر برگشت داده شد.", nothingUndo: "چیزی برای بازگشت نیست.", bgColor: "رنگ پس‌زمینه",
     hidePublic: "پنهان از بازدیدکنندگان", showPublic: "نمایش به بازدیدکنندگان", comingSoon: "این بخش به زودی منتشر می‌شود.",
     captionPh: "کپشن زیر عکس", size_sm: "کوچک", size_md: "متوسط", size_lg: "بزرگ", align_start: "شروع", align_center: "وسط", align_end: "پایان",
@@ -91,7 +92,7 @@ const UI = {
     intro_social: "Real moments of everyday life, seen with a documentary and unpretentious eye.",
     intro_children: "Childhood, play and joy: moments that pass quickly.",
     reorderStart: "Reorder photos", reorderDone: "Finish reordering", reorderHint: "Drag a photo onto another photo in the same subcategory.",
-    sure: "Confirm delete?", trBtn: "Translate automatically", trFail: "Translation failed. Check that the translation key is set on the server.", csvShown: "The list is ready. If the file did not download, copy the text below.", csvCopyHint: "Select and copy the text below, paste it into Notepad and save it with the .csv extension.", csvHead: "Bulk titles and captions", csvExport: "Export photo list (CSV)", csvImport: "Import list (CSV)", csvDone: "List imported", csvBad: "The CSV file is not valid", csvHint: "Download the list, fill in titles and captions in Excel or Google Sheets, then import it again. Do not change the id column.", descEn: "English description", keywordsEn: "English keywords (comma separated)", releaseLbl: "Model / guardian release on file", relNote: "Photos showing children or identifiable people are offered for commercial and media use only with a signed release.", relMissing: "No release is on file for this photo; commercial or media use is not possible.", seriesHead: "Series", seriesAdd: "Add series", seriesIntroLbl: "Series introduction", seriesNone: "No series", copyLink: "Copy photo link", copied: "Link copied", moreTiles: "More sections", autoLbl: "Automatic", tilePhotoLbl: "Tile photo", statsHead: "Figures and track record", statValPh: "e.g. 5000+", statLabelPh: "Short title", statTextPh: "Short description (optional)", newsTitle: "Events", newsIntro: "Upcoming events, workshops and exhibitions.", newsEmpty: "There are no events to show yet.", newsPast: "Past", newsPastHead: "Past events", newsMore: "More details", newsAdd: "Add event", newsHead: "Events and news", newsTitleLbl: "Event title", newsPlace: "Place", newsText: "Description", newsLink: "Details link (with https://)", tileNewsSub: "Upcoming events", hiddenLbl: "Hidden from visitors", subFilter: "Subcategory", allSubs: "All subcategories", tileHead: "Home page tiles", tileNote: "Tiles appear in the categories section of the home page. Each tile can point to a category or a page.", tileAdd: "Add tile", tileHomeSub: "An overview of the work", tileAboutSub: "About and biography", ctaTitle: "Ready to work together?", ctaSub: "Nature, people and moments, wherever light and feeling are.", ctaBtn: "Contact me", contactHead: "Contact", addrHead: "Address", hoursHead: "Hours", socialHead: "Follow", phoneLbl: "Phone", whatsLbl: "WhatsApp (number with country code)", instaLbl: "Instagram link", teleLbl: "Telegram link", contactFieldsLbl: "Contact details (shown at the bottom of every page)", readMore: "More about me", alignLbl: "Text alignment", align_justify: "Justified", aboutPhotoLbl: "Photo for the About page", mobileHint: "On phones: use ↑ ↓ to reorder, and tap a photo to edit its title and description.", trashHead: "Recycle bin", trashShow: "Show recycle bin", trashEmpty: "The recycle bin is empty.", restoreItem: "Restore", purgeItem: "Delete forever", emptyTrash: "Empty bin", textLbl: "Text", trashDone: "Restored", backupHead: "Backup and restore", backupBtn: "Download backup", chooseBackup: "Choose backup file", restoreHint: "Restoring replaces all current data (photos, texts and settings) with the backup file.", restoreGo: "Confirm restore (replace all data)", restoreDone: "Restore finished", backupMade: "Backup file created", backupBad: "The backup file is not valid", close: "Close", wmLbl: "Show a faint glass watermark in the middle of photos", smartLayout: "Smart layout", smartDone: "Smart layout applied", rowsLbl: "rows", pageLbl: "Page", applyTpl: "Apply layout", addPage: "Add page", tpl_single: "One large photo", tpl_two: "Two photos", tpl_three: "Three photos", tpl_four: "Four photos (2 rows)", tpl_bigTwo: "One large and two small", tpl_textPhoto: "Text and photo", pageHLbl: "Page height (% of width)", pageHOn: "Limit page height", pageWarn: "{n} item(s) outside the page", deleteSub: "Delete this subcategory", deleteAll: "Delete all photos", deletedAll: "All photos were deleted", dupLbl: "duplicate (skipped)", folderTitle: "Upload main folder", folderHint: "Choose the main folder. Sub-folders must match category or subcategory names (Persian or English). Any unmatched name is listed after the upload.", noImages: "No images found in this folder.", folderDone: "Folder upload finished", unknownFolders: "Unmatched names", heroEyebrowLbl: "Small title above hero", heroTitleLbl: "Main title", heroTextLbl: "Intro text", heroPhotoLbl: "Slideshow photos (up to 4 landscape)",
+    sure: "Confirm delete?", addMainHead: "Add a category", addMainBtn: "Add category", nmFa: "Persian name", nmEn: "English name", trBtn: "Translate automatically", trFail: "Translation failed. Check that the translation key is set on the server.", csvShown: "The list is ready. If the file did not download, copy the text below.", csvCopyHint: "Select and copy the text below, paste it into Notepad and save it with the .csv extension.", csvHead: "Bulk titles and captions", csvExport: "Export photo list (CSV)", csvImport: "Import list (CSV)", csvDone: "List imported", csvBad: "The CSV file is not valid", csvHint: "Download the list, fill in titles and captions in Excel or Google Sheets, then import it again. Do not change the id column.", descEn: "English description", keywordsEn: "English keywords (comma separated)", releaseLbl: "Model / guardian release on file", relNote: "Photos showing children or identifiable people are offered for commercial and media use only with a signed release.", relMissing: "No release is on file for this photo; commercial or media use is not possible.", seriesHead: "Series", seriesAdd: "Add series", seriesIntroLbl: "Series introduction", seriesNone: "No series", copyLink: "Copy photo link", copied: "Link copied", moreTiles: "More sections", autoLbl: "Automatic", tilePhotoLbl: "Tile photo", statsHead: "Figures and track record", statValPh: "e.g. 5000+", statLabelPh: "Short title", statTextPh: "Short description (optional)", newsTitle: "Events", newsIntro: "Upcoming events, workshops and exhibitions.", newsEmpty: "There are no events to show yet.", newsPast: "Past", newsPastHead: "Past events", newsMore: "More details", newsAdd: "Add event", newsHead: "Events and news", newsTitleLbl: "Event title", newsPlace: "Place", newsText: "Description", newsLink: "Details link (with https://)", tileNewsSub: "Upcoming events", hiddenLbl: "Hidden from visitors", subFilter: "Subcategory", allSubs: "All subcategories", tileHead: "Home page tiles", tileNote: "Tiles appear in the categories section of the home page. Each tile can point to a category or a page.", tileAdd: "Add tile", tileHomeSub: "An overview of the work", tileAboutSub: "About and biography", ctaTitle: "Ready to work together?", ctaSub: "Nature, people and moments, wherever light and feeling are.", ctaBtn: "Contact me", contactHead: "Contact", addrHead: "Address", hoursHead: "Hours", socialHead: "Follow", phoneLbl: "Phone", whatsLbl: "WhatsApp (number with country code)", instaLbl: "Instagram link", teleLbl: "Telegram link", contactFieldsLbl: "Contact details (shown at the bottom of every page)", readMore: "More about me", alignLbl: "Text alignment", align_justify: "Justified", aboutPhotoLbl: "Photo for the About page", mobileHint: "On phones: use ↑ ↓ to reorder, and tap a photo to edit its title and description.", trashHead: "Recycle bin", trashShow: "Show recycle bin", trashEmpty: "The recycle bin is empty.", restoreItem: "Restore", purgeItem: "Delete forever", emptyTrash: "Empty bin", textLbl: "Text", trashDone: "Restored", backupHead: "Backup and restore", backupBtn: "Download backup", chooseBackup: "Choose backup file", restoreHint: "Restoring replaces all current data (photos, texts and settings) with the backup file.", restoreGo: "Confirm restore (replace all data)", restoreDone: "Restore finished", backupMade: "Backup file created", backupBad: "The backup file is not valid", close: "Close", wmLbl: "Show a faint glass watermark in the middle of photos", smartLayout: "Smart layout", smartDone: "Smart layout applied", rowsLbl: "rows", pageLbl: "Page", applyTpl: "Apply layout", addPage: "Add page", tpl_single: "One large photo", tpl_two: "Two photos", tpl_three: "Three photos", tpl_four: "Four photos (2 rows)", tpl_bigTwo: "One large and two small", tpl_textPhoto: "Text and photo", pageHLbl: "Page height (% of width)", pageHOn: "Limit page height", pageWarn: "{n} item(s) outside the page", deleteSub: "Delete this subcategory", deleteAll: "Delete all photos", deletedAll: "All photos were deleted", dupLbl: "duplicate (skipped)", folderTitle: "Upload main folder", folderHint: "Choose the main folder. Sub-folders must match category or subcategory names (Persian or English). Any unmatched name is listed after the upload.", noImages: "No images found in this folder.", folderDone: "Folder upload finished", unknownFolders: "Unmatched names", heroEyebrowLbl: "Small title above hero", heroTitleLbl: "Main title", heroTextLbl: "Intro text", heroPhotoLbl: "Slideshow photos (up to 4 landscape)",
     undo: "Undo", undone: "Change undone.", nothingUndo: "Nothing to undo.", bgColor: "Background color",
     hidePublic: "Hide from visitors", showPublic: "Show to visitors", comingSoon: "This section is coming soon.",
     captionPh: "Caption under photo", size_sm: "Small", size_md: "Medium", size_lg: "Large", align_start: "Start", align_center: "Center", align_end: "End",
@@ -429,7 +430,7 @@ function parseHash() {
     const ph = P.find(x => x.id === h[1]);
     if (ph) return { name: "cat", main: ph.mainId, sub: ph.subId || null, openPhoto: ph.id };
   }
-  if (h[0] === "cat" && MAIN_IDS.includes(h[1])) return { name: "cat", main: h[1], sub: h[2] || null };
+  if (h[0] === "cat" && mainIds().includes(h[1])) return { name: "cat", main: h[1], sub: h[2] || null };
   if (["about", "contact", "admin", "news"].includes(h[0])) return { name: h[0] };
   return { name: "home" };
 }
@@ -474,14 +475,14 @@ function buildNav() {
     `<button data-nav="#home">${t("home")}</button>`,
     `<button data-nav="#about">${t("about")}</button>`
   ];
-  MAIN_IDS.forEach(id => {
+  mainIds().forEach(id => {
     const subs = subsOf(id);
     items.push(`<div class="dropdown">
       <button data-nav="#cat/${id}" aria-haspopup="true">${esc(name(mainObj(id)))}</button>
       <div class="menu">${subs.map(s => `<button data-nav="#cat/${id}/${s.id}">${esc(name(s))}</button>`).join("")}</div>
     </div>`);
   });
-
+  items.push(`<button data-nav="#news">${t("newsTitle")}</button>`);
   if (token) items.push(`<button data-nav="#admin">${t("admin")}</button>`); // visible to the admin only
   $("#mainNav").innerHTML = items.join("");
 }
@@ -636,7 +637,7 @@ function siteContactHTML() {
   ].filter(Boolean).map(i => `<a class="sc-icon" href="${esc(i.href)}" target="_blank" rel="noopener" aria-label="${i.label}">${i.svg}</a>`).join("");
   const navLinks = [
     `<button data-nav="#home">${esc(t("home"))}</button>`,
-    ...MAIN_IDS.map(id => `<button data-nav="#cat/${id}">${esc(name(mainObj(id)))}</button>`),
+    ...mainIds().map(id => `<button data-nav="#cat/${id}">${esc(name(mainObj(id)))}</button>`),
     `<button data-nav="#about">${esc(t("about"))}</button>`,
     `<button data-nav="#contact">${esc(t("contact"))}</button>`
   ].join("");
@@ -798,7 +799,7 @@ const emptyBox = msg => `<div class="empty">${esc(msg)}</div>`;
 const TILE_TARGETS = ["nature", "portrait", "social", "children", "news", "home", "about"];
 const DEFAULT_TILES = ["about", "nature", "portrait", "social", "children", "news", "home"];
 function tileInfoBase(target) {
-  if (MAIN_IDS.includes(target)) {
+  if (mainIds().includes(target)) {
     const cover = P.filter(p => p.mainId === target && p.type !== "text").sort(byNew)[0];
     return { href: `#cat/${target}`, label: name(mainObj(target)), sub: t("intro_" + target), cover };
   }
@@ -1151,7 +1152,7 @@ function subOptions(mainId, selected) {
     subsOf(mainId).map(s => `<option value="${s.id}" ${s.id === selected ? "selected" : ""}>${esc(name(s))}</option>`).join("");
 }
 function mainOptions(selected) {
-  return MAIN_IDS.map(id => `<option value="${id}" ${id === selected ? "selected" : ""}>${esc(name(mainObj(id)))}</option>`).join("");
+  return mainIds().map(id => `<option value="${id}" ${id === selected ? "selected" : ""}>${esc(name(mainObj(id)))}</option>`).join("");
 }
 
 function photosTabHTML() {
@@ -1171,7 +1172,7 @@ function photosTabHTML() {
   <div class="row" style="margin-bottom:14px">
     <label style="margin:0" for="filterSel">${t("filter")}</label>
     <select id="filterSel" data-ad="filter" style="width:auto">
-      <option value="" ${!ad.filter ? "selected" : ""}>${t("allCats")}</option>${MAIN_IDS.map(id => `<option value="${id}" ${ad.filter === id ? "selected" : ""}>${esc(name(mainObj(id)))}</option>`).join("")}
+      <option value="" ${!ad.filter ? "selected" : ""}>${t("allCats")}</option>${mainIds().map(id => `<option value="${id}" ${ad.filter === id ? "selected" : ""}>${esc(name(mainObj(id)))}</option>`).join("")}
     </select>
     ${ad.filter ? `<select id="subFilterSel" data-ad="filterSub" style="width:auto"><option value="">${esc(t("allSubs"))}</option>${subsOf(ad.filter).map(x => `<option value="${x.id}" ${ad.filterSub === x.id ? "selected" : ""}>${esc(name(x))}</option>`).join("")}</select>` : ""}<span class="muted">${list.length} ${t("photosCount")}</span>
   </div>
@@ -1230,8 +1231,8 @@ function textCardHTML(p) {
   </div>`;
 }
 
-function catsTabHTML() {
-  const blocks = MAIN_IDS.map(m => {
+function catsTabHTMLBase() {
+  const blocks = mainIds().map(m => {
     const mo = mainObj(m);
     const subs = subsOf(m);
     const head = renaming === "m:" + m
@@ -1583,6 +1584,10 @@ function autoScrollAt(y) {
 }
 
 /* ---------- Events (تازه‌ها) editor ---------- */
+function catsTabHTML() {
+  const addPanel = `<div class="panel" style="margin-bottom:16px"><h3>${esc(t("addMainHead"))}</h3><div class="row"><input type="text" id="nmFa" placeholder="${esc(t("nmFa"))}" style="width:190px"><input type="text" id="nmEn" dir="ltr" placeholder="${esc(t("nmEn"))}" style="width:190px"><button class="mini" data-act="addMain">${esc(t("addMainBtn"))}</button></div></div>`;
+  return addPanel + catsTabHTMLBase();
+}
 function newsEditorHTML() {
   const items = S.news || [];
   const photoOpts = sel => `<option value="">—</option>` + P.filter(p => p.type !== "text").sort(byNew)
@@ -1658,6 +1663,8 @@ function markMotion() {
     }), { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
   }
   document.querySelectorAll(".mv:not(.on)").forEach(el => motionIO.observe(el));
+  // safety net: anything still faded after a moment is shown, so no content stays invisible
+  setTimeout(() => document.querySelectorAll(".mv").forEach(el => el.classList.add("on")), 2500);
 }
 document.addEventListener("load", e => { if (e.target.tagName === "IMG") e.target.classList.add("loaded"); }, true);
 
@@ -1758,6 +1765,19 @@ async function copyPhotoLink(id) {
   } catch (e) {
     msg.textContent = url;
   }
+}
+
+/* ---------- Add a main category ---------- */
+async function addMain() {
+  const fa = ($("#nmFa").value || "").trim();
+  const en = ($("#nmEn").value || "").trim();
+  if (!fa && !en) { ad.msg = t("reqErr"); ad.kind = "bad"; render(); return; }
+  const id = "c" + Math.random().toString(16).slice(2, 10);
+  S.categories.main.push({ id, fa: fa || en, en: en || fa });
+  S.categories.subs[id] = [];
+  await persistSettings();
+  ad.msg = t("saved"); ad.kind = "ok";
+  render();
 }
 
 /* ---------- Subcategory rows in the categories tab ---------- */
@@ -1908,7 +1928,7 @@ async function importCsv(file) {
     };
     // category and subcategory from the list (by their Persian names), so photos land in the right page
     const catName = get(r, "category"), subName = get(r, "subcategory");
-    const mainHit = catName ? MAIN_IDS.find(mid => mainObj(mid).fa === catName) : null;
+    const mainHit = catName ? mainIds().find(mid => mainObj(mid).fa === catName) : null;
     if (mainHit) {
       meta.mainId = mainHit;
       const subHit = subName ? subsOf(mainHit).find(x => x.fa === subName) : null;
@@ -1930,7 +1950,7 @@ const normName = s => String(s || "").normalize("NFKC").toLowerCase()
   .replace(/ي/g, "ی").replace(/ك/g, "ک");
 function findMain(seg) {
   const n = normName(seg);
-  return MAIN_IDS.find(id => [mainObj(id).fa, mainObj(id).en].some(x => normName(x) === n)) || null;
+  return mainIds().find(id => [mainObj(id).fa, mainObj(id).en].some(x => normName(x) === n)) || null;
 }
 function findSub(mainId, seg) {
   const n = normName(seg);
@@ -2419,6 +2439,7 @@ function onClick(e) {
       else arm("all:photos");
       break;
     case "addSub": run(subAdd); break;
+    case "addMain": run(addMain); break;
     case "subSaveRow": run(() => subSaveRow(m, s)); break;
     case "addSubRow": run(() => addSubRow(m)); break;
     case "metaSave": run(saveMeta); break;
