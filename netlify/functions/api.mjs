@@ -6,7 +6,8 @@ import crypto from "node:crypto";
 const MAX_BYTES = 4 * 1024 * 1024;
 const ID_RE = /^[a-f0-9]{16}$/;
 const SUB_ID_RE = /^[a-z0-9]{1,40}$/i;
-const MAIN_IDS = ["nature", "portrait", "social", "children", "latest"];
+const MAIN_IDS = ["nature", "portrait", "social", "children"];
+const MAIN_ID_RE = /^[a-z][a-z0-9]{1,29}$/;
 const TOKEN_HOURS = 12;
 
 const DEFAULT_SETTINGS = {
@@ -17,8 +18,7 @@ const DEFAULT_SETTINGS = {
       { id: "nature", fa: "طبیعت", en: "Nature" },
       { id: "portrait", fa: "پرتره", en: "Portrait" },
       { id: "social", fa: "اجتماعی و مستند", en: "Social & Documentary" },
-     { id: "children", fa: "کودک", en: "Children" },
-{ id: "latest", fa: "تازه‌ها", en: "Latest" }
+      { id: "children", fa: "کودک", en: "Children" }
     ],
     subs: {
       nature: [
@@ -42,25 +42,25 @@ const DEFAULT_SETTINGS = {
         { id: "issues", fa: "مسائل اجتماعی", en: "Social Issues" },
         { id: "people", fa: "مشاغل و انسان‌ها", en: "People & Occupations" }
       ],
-   children: [
-  { id: "kidportrait", fa: "پرتره کودک", en: "Children's Portraits" },
-  { id: "play", fa: "بازی و شادی", en: "Play & Joy" },
-  { id: "kiddaily", fa: "زندگی روزمره کودک", en: "Children's Daily Life" },
-  { id: "kidnature", fa: "کودکان و طبیعت", en: "Children & Nature" }
-],
-latest: [
-  { id: "irantribes", fa: "جشنواره اقوام ایران", en: "Iranian Ethnic Festival" }
-]
+      children: [
+        { id: "kidportrait", fa: "پرتره کودک", en: "Children's Portraits" },
+        { id: "play", fa: "بازی و شادی", en: "Play & Joy" },
+        { id: "kiddaily", fa: "زندگی روزمره کودک", en: "Children's Daily Life" },
+        { id: "kidnature", fa: "کودکان و طبیعت", en: "Children & Nature" }
+      ]
     }
   }
 };
 
-const store = () => getStore({
-  name: "kanissun",
-  siteID: process.env.BLOBS_SITE_ID,
-  token: process.env.BLOBS_TOKEN,
-  consistency: "strong"
-});
+// Blobs connection: uses BLOBS_SITE_ID + BLOBS_TOKEN when set (manual config), otherwise Netlify's automatic context.
+const storeOpts = () => {
+  const siteID = globalThis.process?.env?.BLOBS_SITE_ID;
+  const token = globalThis.process?.env?.BLOBS_TOKEN;
+  return siteID && token
+    ? { name: "kanissun", consistency: "strong", siteID, token }
+    : { name: "kanissun", consistency: "strong" };
+};
+const store = () => getStore(storeOpts());
 
 const reply = (statusCode, body, extraHeaders = {}) => ({
   statusCode,
@@ -155,51 +155,16 @@ function parseBody(event) {
 }
 
 /* ---------- Data helpers ---------- */
-
 async function getSettings() {
   const s = await store().get("settings", { type: "json" });
-  const saved = s || {};
-  const base = structuredClone(DEFAULT_SETTINGS);
-
-  const categories = {
-    main: [...(saved.categories?.main || base.categories.main)],
-    subs: {
-      ...base.categories.subs,
-      ...(saved.categories?.subs || {})
-    }
-  };
-
-  if (!categories.main.some(m => m.id === "latest")) {
-    categories.main.push({
-      id: "latest",
-      fa: "تازه‌ها",
-      en: "Latest"
-    });
-  }
-
-  if (!Array.isArray(categories.subs.latest)) {
-    categories.subs.latest = [];
-  }
-
-  if (!categories.subs.latest.some(item => item.id === "irantribes")) {
-    categories.subs.latest.push({
-      id: "irantribes",
-      fa: "جشنواره اقوام ایران",
-      en: "Iranian Ethnic Festival"
-    });
-  }
-
+  if (!s) return structuredClone(DEFAULT_SETTINGS);
   return {
-    ...base,
-    ...saved,
-    about: {
-      ...base.about,
-      ...(saved.about || {})
-    },
-    categories
+    ...structuredClone(DEFAULT_SETTINGS),
+    ...s,
+    about: { ...DEFAULT_SETTINGS.about, ...(s.about || {}) },
+    categories: s.categories || structuredClone(DEFAULT_SETTINGS.categories)
   };
 }
-
 
 function sanitizeMeta(m) {
   const pair = v => ({ fa: str(v?.fa, 300), en: str(v?.en, 300) });
@@ -208,7 +173,7 @@ function sanitizeMeta(m) {
     title: pair(m.title),
     desc: { fa: str(m.desc?.fa, 3000), en: str(m.desc?.en, 3000) },
     keywords: str(m.keywords, 500),
-    mainId: MAIN_IDS.includes(m.mainId) ? m.mainId : "nature",
+    mainId: MAIN_ID_RE.test(String(m.mainId || "")) ? String(m.mainId) : "nature",
     subId: m.subId && SUB_ID_RE.test(String(m.subId)) ? String(m.subId) : null,
     featured: !!m.featured,
     crop: { x: clamp(m.crop?.x), y: clamp(m.crop?.y) },
@@ -235,16 +200,18 @@ function sanitizeMeta(m) {
 }
 
 function sanitizeCategories(c) {
-  const main = MAIN_IDS.map(id => {
-    const found = (c.main || []).find(m => m.id === id) || {};
-    return { id, fa: str(found.fa, 120) || id, en: str(found.en, 120) || id };
-  });
+  const DEF = [{ id: "nature", fa: "طبیعت", en: "Nature" }, { id: "portrait", fa: "پرتره", en: "Portrait" }, { id: "social", fa: "اجتماعی و مستند", en: "Social" }, { id: "children", fa: "کودک", en: "Children" }];
+  const list = Array.isArray(c.main) && c.main.length ? c.main : DEF;
+  const main = list
+    .filter(m => m && MAIN_ID_RE.test(String(m.id)))
+    .slice(0, 30)
+    .map(m => ({ id: String(m.id), fa: str(m.fa, 120) || String(m.id), en: str(m.en, 120) || String(m.id) }));
   const subs = {};
-  for (const id of MAIN_IDS) {
-    const list = Array.isArray(c.subs?.[id]) ? c.subs[id] : [];
-    subs[id] = list
-      .filter(s => s && SUB_ID_RE.test(String(s.id)))
-      .map(s => ({ id: String(s.id), fa: str(s.fa, 120) || s.id, en: str(s.en, 120) || s.id }));
+  for (const m of main) {
+    const sl = Array.isArray(c.subs?.[m.id]) ? c.subs[m.id] : [];
+    subs[m.id] = sl
+      .filter(x => x && SUB_ID_RE.test(String(x.id)))
+      .map(x => ({ id: String(x.id), fa: str(x.fa, 120) || x.id, en: str(x.en, 120) || x.id }));
   }
   return { main, subs };
 }
@@ -347,6 +314,20 @@ async function uploadPhoto(body) {
     await store().set(`thumb/${body.id}`, tab, { metadata: { mime: body.thumbMime || "image/webp" } });
   }
   const meta = sanitizeMeta({ ...body.meta, id: body.id });
+  await store().set(`meta/${body.id}`, JSON.stringify(meta));
+  return reply(200, { ok: true, photo: meta });
+}
+
+async function createText(body) {
+  if (!body || !ID_RE.test(body.id || "") || !body.meta || typeof body.meta !== "object") {
+    return reply(400, { error: "bad request" });
+  }
+  const meta = sanitizeMeta({
+    ...body.meta,
+    id: body.id,
+    createdAt: body.meta.createdAt || Date.now()
+  });
+  meta.type = "text";
   await store().set(`meta/${body.id}`, JSON.stringify(meta));
   return reply(200, { ok: true, photo: meta });
 }
