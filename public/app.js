@@ -405,6 +405,7 @@ function arm(key) {
 }
 let vIds = [], vI = 0;
 const ad = { tab: "photos", upMain: "nature", upSub: "", filter: "", msg: "", kind: "" };
+let kanAiMessages = [];
 
 /* ---------- Helpers ---------- */
 const t = k => (UI[lang] && UI[lang][k]) || UI.fa[k] || k;
@@ -431,7 +432,8 @@ function parseHash() {
     if (ph) return { name: "cat", main: ph.mainId, sub: ph.subId || null, openPhoto: ph.id };
   }
   if (h[0] === "cat" && mainIds().includes(h[1])) return { name: "cat", main: h[1], sub: h[2] || null };
-  if (["about", "contact", "admin", "news"].includes(h[0])) return { name: h[0] };
+  if (h[0] === "admin") return { name: "admin", tab: h[1] || null };
+  if (["about", "contact", "news"].includes(h[0])) return { name: h[0] };
   return { name: "home" };
 }
 function navigate(hash) {
@@ -483,7 +485,9 @@ function buildNav() {
     </div>`);
   });
   items.push(`<button data-nav="#news">${t("newsTitle")}</button>`);
-  if (token) items.push(`<button data-nav="#admin">${t("admin")}</button>`); // visible to the admin only
+  if (token) {
+    items.push(`<button data-nav="#admin">${t("admin")}</button>`);
+  }
   $("#mainNav").innerHTML = items.join("");
 }
 function applyLang() {
@@ -1143,10 +1147,114 @@ function adminHTML() {
   const tabs = `<div class="tabs">
     <button data-tab="photos" class="${ad.tab === "photos" ? "on" : ""}">${t("tabPhotos")}</button>
     <button data-tab="cats" class="${ad.tab === "cats" ? "on" : ""}">${t("tabCats")}</button>
+    <button data-tab="ai" class="${ad.tab === "ai" ? "on" : ""}">${lang === "fa" ? "دستیار هوش مصنوعی" : "AI Assistant"}</button>
     <button data-act="logout">${t("logout")}</button></div>`;
-  return `<h1>${t("admin")}</h1>${tabs}${msg}${ad.tab === "photos" ? photosTabHTML() : catsTabHTML()}`;
+  const content = ad.tab === "ai" ? aiTabHTML() : ad.tab === "photos" ? photosTabHTML() : catsTabHTML();
+  return `<h1>${t("admin")}</h1>${tabs}${msg}${content}`;
 }
 
+function aiTabHTML() {
+  const fa = lang === "fa";
+  return `
+  <div class="panel kan-ai">
+    <h3>${fa ? "دستیار هوش مصنوعی کانیسان" : "Kanissun AI Assistant"}</h3>
+    <p class="muted">${fa ? "مدل‌ها روی همین رایانه اجرا می‌شوند؛ عکس و متن برای سرویس ابری ارسال نمی‌شود." : "Models run locally on this computer. Photos and text are not sent to a cloud AI service."}</p>
+    <form id="kanAiForm" class="form">
+      <div>
+        <label for="kanAiModel">${fa ? "مدل هوش مصنوعی" : "AI model"}</label>
+        <select id="kanAiModel">
+          <option value="qwen3-vl:4b">${fa ? "Qwen3-VL — تحلیل عکس و تصویر" : "Qwen3-VL — Image analysis"}</option>
+          <option value="llama3.1:8b">${fa ? "Llama 3.1 — نوشتن و امور مدیریتی" : "Llama 3.1 — Writing and admin"}</option>
+        </select>
+      </div>
+      <div>
+        <label for="kanAiPrompt">${fa ? "درخواست شما" : "Your request"}</label>
+        <textarea id="kanAiPrompt" rows="5" placeholder="${fa ? "مثلاً این عکس را تحلیل کن و عنوان هنری، توضیح و کلیدواژه پیشنهاد بده..." : "For example: Analyze this photo and suggest an artistic title, description, and keywords..."}"></textarea>
+      </div>
+      <div>
+        <label for="kanAiImage">${fa ? "انتخاب عکس (اختیاری)" : "Choose a photo (optional)"}</label>
+        <input id="kanAiImage" type="file" accept="image/jpeg,image/png,image/webp">
+        <p class="muted">${fa ? "برای تحلیل عکس، مدل Qwen3-VL را انتخاب کن. حداکثر حجم فایل ۱۲ مگابایت است." : "Choose Qwen3-VL for image analysis. Maximum file size: 12 MB."}</p>
+      </div>
+      <div class="row">
+        <button class="btn solid" id="kanAiSend" type="submit">${fa ? "ارسال درخواست" : "Send request"}</button>
+        <button class="btn" type="button" id="kanAiClear" data-ai-clear="1">${fa ? "گفت‌وگوی تازه" : "New conversation"}</button>
+      </div>
+    </form>
+    <div id="kanAiStatus" class="notice" aria-live="polite">${fa ? "آماده به کار" : "Ready"}</div>
+    <div id="kanAiOutput" class="kan-ai-output" dir="auto">${fa ? "پاسخ دستیار اینجا نمایش داده می‌شود." : "The assistant response will appear here."}</div>
+  </div>`;
+}
+
+async function submitKanAi() {
+  const fa = lang === "fa";
+  const promptEl = $("#kanAiPrompt");
+  const model = $("#kanAiModel").value;
+  const file = $("#kanAiImage").files[0];
+  const prompt = promptEl.value.trim();
+
+  if (!prompt && !file) {
+    $("#kanAiStatus").textContent = fa ? "لطفاً درخواست یا عکسی انتخاب کن." : "Please enter a request or choose a photo.";
+    return;
+  }
+  if (file && file.size > 12 * 1024 * 1024) {
+    $("#kanAiStatus").textContent = fa ? "حجم عکس باید کمتر از ۱۲ مگابایت باشد." : "The image must be smaller than 12 MB.";
+    return;
+  }
+  if (file && !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    $("#kanAiStatus").textContent = fa ? "فرمت عکس باید JPG، PNG یا WebP باشد." : "Image format must be JPG, PNG, or WebP.";
+    return;
+  }
+
+  const send = $("#kanAiSend");
+  const status = $("#kanAiStatus");
+  const output = $("#kanAiOutput");
+  send.disabled = true;
+  status.textContent = fa ? "در حال پردازش با مدل محلی..." : "Processing with the local model...";
+  output.textContent = "";
+
+  try {
+    const message = { role: "user", content: prompt || (fa ? "این عکس را تحلیل کن." : "Analyze this image.") };
+
+    if (file) {
+      const buffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      let binary = "";
+      const chunkSize = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+      }
+      message.images = [btoa(binary)];
+    }
+
+    kanAiMessages.push(message);
+    const history = kanAiMessages.slice(-8);
+
+    const response = await fetch("http://127.0.0.1:3210/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model, messages: history })
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+
+    const answer = data.message && data.message.content;
+    if (!answer) throw new Error(fa ? "پاسخی از مدل دریافت نشد." : "No response received from model.");
+
+    kanAiMessages.push({ role: "assistant", content: answer });
+    kanAiMessages = kanAiMessages.slice(-8);
+    output.textContent = answer;
+    status.textContent = fa ? "پاسخ دریافت شد." : "Response received.";
+  } catch (err) {
+    if (kanAiMessages.length && kanAiMessages[kanAiMessages.length - 1].role === "user") {
+      kanAiMessages.pop();
+    }
+    status.textContent = (fa ? "خطا: " : "Error: ") + (err.message || "Unknown error");
+  } finally {
+    send.disabled = false;
+  }
+}
 function subOptions(mainId, selected) {
   return `<option value="">${t("noSub")}</option>` +
     subsOf(mainId).map(s => `<option value="${s.id}" ${s.id === selected ? "selected" : ""}>${esc(name(s))}</option>`).join("");
@@ -2048,6 +2156,7 @@ function vNav(d) {
 /* ---------- Render ---------- */
 function render() {
   route = parseHash();
+  if (route.name === "admin" && route.tab) ad.tab = route.tab;
   if (!token || !["home", "about", "cat"].includes(route.name)) reorderMode = false;
   if (route.name === "cat") { /* message shown once in the gallery toolbar */ }
   applyLang();
@@ -2356,6 +2465,15 @@ function onClick(e) {
   }
   const tab = e.target.closest("[data-tab]");
   if (tab) { ad.tab = tab.dataset.tab; render(); return; }
+  const aiClear = e.target.closest("[data-ai-clear]");
+  if (aiClear) {
+    kanAiMessages = [];
+    const out = $("#kanAiOutput");
+    const status = $("#kanAiStatus");
+    if (out) out.textContent = lang === "fa" ? "گفت‌وگوی تازه آماده است." : "A new conversation is ready.";
+    if (status) status.textContent = lang === "fa" ? "آماده به کار" : "Ready";
+    return;
+  }
   const act = e.target.closest("[data-act]");
   if (!act) return;
   const a = act.dataset.act, id = act.dataset.id, m = act.dataset.main, s = act.dataset.sub;
@@ -2539,6 +2657,11 @@ function onSubmit(e) {
     e.preventDefault();
     const pw = $("#pw").value;
     login(pw).catch(() => { $("#loginErr").textContent = t("wrongPw"); });
+    return;
+  }
+  if (e.target.id === "kanAiForm") {
+    e.preventDefault();
+    submitKanAi();
     return;
   }
   if (e.target.id === "iForm") {

@@ -670,3 +670,20 @@ nav.main>button:hover::after,.dropdown>button:hover::after{transform:scaleX(1)}
 /* Keyword and series chips, honeypot field, release note */
 .kw-chips{display:flex;flex-wrap:wrap;gap:10px;margin:-8px 0 26px}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+/* Kanissun local AI assistant */
+.kan-ai { max-width: 920px; }
+.kan-ai .muted { color: var(--muted); font-size: .88rem; line-height: 1.8; }
+.kan-ai-output {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  min-height: 130px;
+  padding: 18px;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--bg3);
+  line-height: 1.9;
+}
+.kan-ai .row { display: flex; flex-wrap: wrap; gap: 10px; }
+.kan-ai button:disabled { opacity: .5; cursor: wait; }
