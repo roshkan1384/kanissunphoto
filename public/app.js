@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
 "use strict";
 
 const API = "/.netlify/functions/api";
@@ -1172,10 +1172,21 @@ function aiTabHTML() {
         <textarea id="kanAiPrompt" rows="5" placeholder="${fa ? "مثلاً این عکس را تحلیل کن و عنوان هنری، توضیح و کلیدواژه پیشنهاد بده..." : "For example: Analyze this photo and suggest an artistic title, description, and keywords..."}"></textarea>
       </div>
       <div>
-        <label for="kanAiImage">${fa ? "انتخاب عکس (اختیاری)" : "Choose a photo (optional)"}</label>
-        <input id="kanAiImage" type="file" accept="image/jpeg,image/png,image/webp">
-        <p class="muted">${fa ? "برای تحلیل عکس، مدل Qwen3-VL را انتخاب کن. حداکثر حجم فایل ۱۲ مگابایت است." : "Choose Qwen3-VL for image analysis. Maximum file size: 12 MB."}</p>
-      </div>
+  <label for="kanAiImage">انتخاب عکس از لپ‌تاپ (اختیاری)</label>
+  <input id="kanAiImage" type="file" accept="image/jpeg,image/png,image/webp">
+  <div style="margin-top:10px">
+    <button type="button" id="kanAiGalleryOpen">🖼️ Choose Site</button>
+    <div id="kanAiGallerySelectedLabel" class="muted" style="margin-top:8px">هنوز عکسی از گالری انتخاب نشده است.</div>
+  </div>
+  <div id="kanAiGalleryPicker" hidden style="margin-top:12px;padding:12px;border:1px solid var(--border,#888);border-radius:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <strong>گالری تصاویر سایت</strong>
+      <button type="button" id="kanAiGalleryClose">بستن</button>
+    </div>
+    <div id="kanAiGalleryItems" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:10px;margin-top:12px"></div>
+  </div>
+  <p class="muted">برای تحلیل عکس، مدل Qwen3-VL را انتخاب کن. حداکثر حجم عکس ۱۲ مگابایت است.</p>
+</div>
       <div class="row">
         <button class="btn solid" id="kanAiSend" type="submit">${fa ? "ارسال درخواست" : "Send request"}</button>
         <button class="btn" type="button" id="kanAiClear" data-ai-clear="1">${fa ? "گفت‌وگوی تازه" : "New conversation"}</button>
@@ -1190,10 +1201,11 @@ async function submitKanAi() {
   const fa = lang === "fa";
   const promptEl = $("#kanAiPrompt");
   const model = $("#kanAiModel").value;
-  const file = $("#kanAiImage").files[0];
+const file = $("#kanAiImage").files[0];
+  const galleryImage = window.__kanAiGallerySelected || null;
   const prompt = promptEl.value.trim();
 
-  if (!prompt && !file) {
+  if (!prompt && !file && !galleryImage) {
     $("#kanAiStatus").textContent = fa ? "لطفاً درخواست یا عکسی انتخاب کن." : "Please enter a request or choose a photo.";
     return;
   }
@@ -1216,16 +1228,32 @@ async function submitKanAi() {
   try {
     const message = { role: "user", content: prompt || (fa ? "این عکس را تحلیل کن." : "Analyze this image.") };
 
-    if (file) {
-      const buffer = await file.arrayBuffer();
-      const bytes = new Uint8Array(buffer);
-      let binary = "";
-      const chunkSize = 0x8000;
-      for (let i = 0; i < bytes.length; i += chunkSize) {
-        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-      }
-      message.images = [btoa(binary)];
+    if (file || galleryImage) {
+    let imageBlob = file;
+
+    if (galleryImage) {
+      const imageResponse = await fetch(imgUrl(galleryImage.id, false, true));
+      if (!imageResponse.ok) throw new Error("دریافت عکس از گالری سایت ناموفق بود.");
+      imageBlob = await imageResponse.blob();
     }
+
+    if (imageBlob.size > 12 * 1024 * 1024) {
+      throw new Error("حجم عکس بیشتر از ۱۲ مگابایت است.");
+    }
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(imageBlob.type)) {
+      throw new Error("فرمت عکس باید JPG، PNG یا WebP باشد.");
+    }
+
+    const buffer = await imageBlob.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    }
+    message.images = [btoa(binary)];
+  }
 
     kanAiMessages.push(message);
     const history = kanAiMessages.slice(-8);
@@ -2735,3 +2763,124 @@ async function init() {
 
 init();
 })();
+
+
+// __KANISSUN_GALLERY_PICKER_V1__
+(() => {
+  const selectedLabel = () => document.getElementById("kanAiGallerySelectedLabel");
+  const picker = () => document.getElementById("kanAiGalleryPicker");
+  const items = () => document.getElementById("kanAiGalleryItems");
+
+  const safeText = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  })[ch]);
+
+  function renderGallery() {
+    const target = items();
+    if (!target) return;
+
+    const photos = (Array.isArray(P) ? P : []).filter(p => p && p.type !== "text");
+    if (!photos.length) {
+      target.textContent = "تصویری در گالری پیدا نشد.";
+      return;
+    }
+
+    target.innerHTML = photos.map((p, i) => {
+      const id = p.id || p.key || p.blobKey || p.imageId;
+      if (!id) return "";
+      const title = p.title || p.name || p.filename || `تصویر ${i + 1}`;
+      const thumb = imgUrl(id, false, false);
+      return `<button type="button" data-kan-ai-gallery-index="${i}" style="padding:5px;border:1px solid var(--border,#888);border-radius:8px;background:transparent;cursor:pointer">
+        <img src="${safeText(thumb)}" alt="${safeText(title)}" loading="lazy" style="width:100%;height:95px;object-fit:cover;border-radius:5px">
+        <span style="display:block;font-size:12px;margin-top:5px">${safeText(title)}</span>
+      </button>`;
+    }).join("");
+
+    if (!target.innerHTML) target.textContent = "شناسهٔ قابل استفاده‌ای برای تصاویر گالری پیدا نشد.";
+  }
+
+  document.addEventListener("click", event => {
+    const open = event.target.closest("#kanAiGalleryOpen");
+    if (open) {
+      renderGallery();
+      if (picker()) picker().hidden = false;
+      return;
+    }
+
+    const close = event.target.closest("#kanAiGalleryClose");
+    if (close) {
+      if (picker()) picker().hidden = true;
+      return;
+    }
+
+    const choice = event.target.closest("[data-kan-ai-gallery-index]");
+    if (choice) {
+      const index = Number(choice.dataset.kanAiGalleryIndex);
+      const photo = Array.isArray(P) ? P.filter(p => p && p.type !== "text")[index] : null;
+      const id = photo && (photo.id || photo.key || photo.blobKey || photo.imageId);
+      if (!id) {
+        alert("شناسهٔ این عکس در گالری پیدا نشد.");
+        return;
+      }
+
+      window.__kanAiGallerySelected = {
+        id,
+        name: photo.title || photo.name || photo.filename || "عکس گالری"
+      };
+
+      const label = selectedLabel();
+      if (label) label.textContent = "عکس انتخاب‌شده: " + window.__kanAiGallerySelected.name;
+      const input = document.getElementById("kanAiImage");
+      if (input) input.value = "";
+      if (picker()) picker().hidden = true;
+    }
+  });
+
+  document.addEventListener("change", event => {
+    if (event.target && event.target.id === "kanAiImage" && event.target.files.length) {
+      window.__kanAiGallerySelected = null;
+      const label = selectedLabel();
+      if (label) label.textContent = "عکس انتخاب‌شده از لپ‌تاپ";
+    }
+  });
+})();
+
+
+
+// __KANISSUN_CHOOSE_SITE_INLINE_V1__
+(() => {
+    const arrangeChooseSite = () => {
+        const fileInput = document.getElementById("kanAiImage");
+        const siteButton = document.getElementById("kanAiGalleryOpen");
+        if (!fileInput || !siteButton || siteButton.dataset.kanAiInline === "1") return;
+
+        const row = document.createElement("div");
+        row.id = "kanAiFileSiteRow";
+        row.style.cssText = "display:flex;align-items:center;gap:8px;width:100%;margin:8px 0;";
+
+        fileInput.parentNode.insertBefore(row, fileInput);
+        row.appendChild(fileInput);
+        row.appendChild(siteButton);
+
+        fileInput.style.flex = "1 1 auto";
+        fileInput.style.minWidth = "0";
+        fileInput.style.width = "1px";
+
+        siteButton.textContent = "🖼️ Choose Site";
+        siteButton.style.flex = "0 0 auto";
+        siteButton.style.whiteSpace = "nowrap";
+        siteButton.dataset.kanAiInline = "1";
+    };
+
+    const start = () => {
+        arrangeChooseSite();
+        new MutationObserver(arrangeChooseSite).observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    };
+
+    if (document.body) start();
+    else document.addEventListener("DOMContentLoaded", start, { once: true });
+})();
+
