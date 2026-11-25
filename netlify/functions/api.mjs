@@ -52,7 +52,7 @@ const DEFAULT_SETTINGS = {
   }
 };
 
-const store = () => getStore({ name: "kanissun", consistency: "strong" });
+const store = () => getStore({ name: "kanissun", consistency: "eventual" });
 
 const reply = (statusCode, body, extraHeaders = {}) => ({
   statusCode,
