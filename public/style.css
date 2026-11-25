@@ -687,3 +687,18 @@ nav.main>button:hover::after,.dropdown>button:hover::after{transform:scaleX(1)}
 }
 .kan-ai .row { display: flex; flex-wrap: wrap; gap: 10px; }
 .kan-ai button:disabled { opacity: .5; cursor: wait; }
+
+/* __KANISSUN_DUAL_AI_MERGED_V1__ */
+/* KanissunPhoto AI (admin only) */
+.ai-btn{position:fixed;left:18px;bottom:18px;z-index:60;background:#141414;color:var(--accent,#c9a46a);border:1px solid rgba(201,164,106,.5);border-radius:999px;padding:9px 16px;font:inherit;font-size:.9rem;cursor:pointer;box-shadow:0 8px 24px -10px rgba(0,0,0,.8)}
+.ai-btn:hover{border-color:var(--accent,#c9a46a)}
+.ai-panel{position:fixed;left:18px;bottom:72px;z-index:61;width:min(360px,calc(100vw - 36px));background:#121212;border:1px solid rgba(201,164,106,.4);border-radius:12px;padding:14px;display:grid;gap:10px;box-shadow:0 18px 40px -16px rgba(0,0,0,.9)}
+.ai-head{display:flex;justify-content:space-between;align-items:center;color:#eee}
+.ai-panel select,.ai-panel textarea{width:100%;background:#0b0b0b;color:#eee;border:1px solid #333;border-radius:8px;padding:8px;font:inherit}
+.ai-out{white-space:pre-wrap;color:#ddd;font-size:.9rem;max-height:260px;overflow:auto}
+.ai-pickrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ai-chosen{color:#bbb;font-size:.85rem}
+.ai-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:200px;overflow:auto}
+.ai-thumb{padding:0;border:1px solid #333;background:#000;border-radius:6px;overflow:hidden;cursor:pointer;aspect-ratio:1/1}
+.ai-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.ai-thumb:hover{border-color:var(--accent,#c9a46a)}

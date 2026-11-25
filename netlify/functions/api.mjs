@@ -1,4 +1,4 @@
-import { connectLambda, getStore } from "@netlify/blobs";
+﻿import { connectLambda, getStore } from "@netlify/blobs";
 import crypto from "node:crypto";
 
 // Netlify function request/response bodies are limited to ~6 MB.
@@ -15,38 +15,38 @@ const DEFAULT_SETTINGS = {
   about: { bio: "", background: "", approach: "", email: "photokanissun@gmail.com" },
   categories: {
     main: [
-      { id: "nature", fa: "طبیعت", en: "Nature" },
-      { id: "portrait", fa: "پرتره", en: "Portrait" },
-      { id: "social", fa: "اجتماعی و مستند", en: "Social & Documentary" },
-      { id: "children", fa: "کودک", en: "Children" }
+      { id: "nature", fa: "Ø·Ø¨ÛŒØ¹Øª", en: "Nature" },
+      { id: "portrait", fa: "Ù¾Ø±ØªØ±Ù‡", en: "Portrait" },
+      { id: "social", fa: "Ø§Ø¬ØªÙ…Ø§Ø¹ÛŒ Ùˆ Ù…Ø³ØªÙ†Ø¯", en: "Social & Documentary" },
+      { id: "children", fa: "Ú©ÙˆØ¯Ú©", en: "Children" }
     ],
     subs: {
       nature: [
-        { id: "flowers", fa: "گل و گیاه", en: "Flowers & Plants" },
-        { id: "landscape", fa: "چشم‌انداز", en: "Landscapes" },
-        { id: "environment", fa: "محیط زیست", en: "Environment" },
-        { id: "stilllife", fa: "طبیعت بی‌جان", en: "Still Life" },
-        { id: "wildlife", fa: "حیات وحش", en: "Wildlife" }
+        { id: "flowers", fa: "Ú¯Ù„ Ùˆ Ú¯ÛŒØ§Ù‡", en: "Flowers & Plants" },
+        { id: "landscape", fa: "Ú†Ø´Ù…â€ŒØ§Ù†Ø¯Ø§Ø²", en: "Landscapes" },
+        { id: "environment", fa: "Ù…Ø­ÛŒØ· Ø²ÛŒØ³Øª", en: "Environment" },
+        { id: "stilllife", fa: "Ø·Ø¨ÛŒØ¹Øª Ø¨ÛŒâ€ŒØ¬Ø§Ù†", en: "Still Life" },
+        { id: "wildlife", fa: "Ø­ÛŒØ§Øª ÙˆØ­Ø´", en: "Wildlife" }
       ],
       portrait: [
-        { id: "individual", fa: "پرتره فردی", en: "Individual Portraits" },
-        { id: "environmental", fa: "پرتره محیطی", en: "Environmental Portraits" },
-        { id: "fineart", fa: "پرتره هنری", en: "Fine Art Portraits" },
-        { id: "faces", fa: "چهره و احساسات", en: "Faces & Emotions" }
+        { id: "individual", fa: "Ù¾Ø±ØªØ±Ù‡ ÙØ±Ø¯ÛŒ", en: "Individual Portraits" },
+        { id: "environmental", fa: "Ù¾Ø±ØªØ±Ù‡ Ù…Ø­ÛŒØ·ÛŒ", en: "Environmental Portraits" },
+        { id: "fineart", fa: "Ù¾Ø±ØªØ±Ù‡ Ù‡Ù†Ø±ÛŒ", en: "Fine Art Portraits" },
+        { id: "faces", fa: "Ú†Ù‡Ø±Ù‡ Ùˆ Ø§Ø­Ø³Ø§Ø³Ø§Øª", en: "Faces & Emotions" }
       ],
       social: [
-        { id: "daily", fa: "زندگی روزمره", en: "Everyday Life" },
-        { id: "culture", fa: "فرهنگ و آداب‌ورسوم", en: "Culture & Traditions" },
-        { id: "rural", fa: "زندگی روستایی", en: "Rural Life" },
-        { id: "urban", fa: "زندگی شهری", en: "Urban Life" },
-        { id: "issues", fa: "مسائل اجتماعی", en: "Social Issues" },
-        { id: "people", fa: "مشاغل و انسان‌ها", en: "People & Occupations" }
+        { id: "daily", fa: "Ø²Ù†Ø¯Ú¯ÛŒ Ø±ÙˆØ²Ù…Ø±Ù‡", en: "Everyday Life" },
+        { id: "culture", fa: "ÙØ±Ù‡Ù†Ú¯ Ùˆ Ø¢Ø¯Ø§Ø¨â€ŒÙˆØ±Ø³ÙˆÙ…", en: "Culture & Traditions" },
+        { id: "rural", fa: "Ø²Ù†Ø¯Ú¯ÛŒ Ø±ÙˆØ³ØªØ§ÛŒÛŒ", en: "Rural Life" },
+        { id: "urban", fa: "Ø²Ù†Ø¯Ú¯ÛŒ Ø´Ù‡Ø±ÛŒ", en: "Urban Life" },
+        { id: "issues", fa: "Ù…Ø³Ø§Ø¦Ù„ Ø§Ø¬ØªÙ…Ø§Ø¹ÛŒ", en: "Social Issues" },
+        { id: "people", fa: "Ù…Ø´Ø§ØºÙ„ Ùˆ Ø§Ù†Ø³Ø§Ù†â€ŒÙ‡Ø§", en: "People & Occupations" }
       ],
       children: [
-        { id: "kidportrait", fa: "پرتره کودک", en: "Children's Portraits" },
-        { id: "play", fa: "بازی و شادی", en: "Play & Joy" },
-        { id: "kiddaily", fa: "زندگی روزمره کودک", en: "Children's Daily Life" },
-        { id: "kidnature", fa: "کودکان و طبیعت", en: "Children & Nature" }
+        { id: "kidportrait", fa: "Ù¾Ø±ØªØ±Ù‡ Ú©ÙˆØ¯Ú©", en: "Children's Portraits" },
+        { id: "play", fa: "Ø¨Ø§Ø²ÛŒ Ùˆ Ø´Ø§Ø¯ÛŒ", en: "Play & Joy" },
+        { id: "kiddaily", fa: "Ø²Ù†Ø¯Ú¯ÛŒ Ø±ÙˆØ²Ù…Ø±Ù‡ Ú©ÙˆØ¯Ú©", en: "Children's Daily Life" },
+        { id: "kidnature", fa: "Ú©ÙˆØ¯Ú©Ø§Ù† Ùˆ Ø·Ø¨ÛŒØ¹Øª", en: "Children & Nature" }
       ]
     }
   }
@@ -192,7 +192,7 @@ function sanitizeMeta(m) {
 }
 
 function sanitizeCategories(c) {
-  const DEF = [{ id: "nature", fa: "طبیعت", en: "Nature" }, { id: "portrait", fa: "پرتره", en: "Portrait" }, { id: "social", fa: "اجتماعی و مستند", en: "Social" }, { id: "children", fa: "کودک", en: "Children" }];
+  const DEF = [{ id: "nature", fa: "Ø·Ø¨ÛŒØ¹Øª", en: "Nature" }, { id: "portrait", fa: "Ù¾Ø±ØªØ±Ù‡", en: "Portrait" }, { id: "social", fa: "Ø§Ø¬ØªÙ…Ø§Ø¹ÛŒ Ùˆ Ù…Ø³ØªÙ†Ø¯", en: "Social" }, { id: "children", fa: "Ú©ÙˆØ¯Ú©", en: "Children" }];
   const list = Array.isArray(c.main) && c.main.length ? c.main : DEF;
   const main = list
     .filter(m => m && MAIN_ID_RE.test(String(m.id)))
@@ -417,7 +417,7 @@ async function translateText(body) {
     method: "POST",
     headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
     body: JSON.stringify({
-      model: "claude-haiku-5-5",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 600,
       system: "Translate the user's Persian text into natural, poetic English. Keep the first-person voice and the meaning. Return only the translation, nothing else.",
       messages: [{ role: "user", content: text }]
@@ -428,6 +428,39 @@ async function translateText(body) {
   const out = (j.content || []).filter(x => x.type === "text").map(x => x.text).join("").trim();
   return reply(200, { text: out });
 }
+
+
+/* __KANISSUN_DUAL_AI_MERGED_V1__ */
+async function aiAsk(body) {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) return reply(503, { error: "AI is not configured on the server (ANTHROPIC_API_KEY)" });
+  const prompt = str(body && body.prompt, 3000);
+  const context = str(body && body.context, 2000);
+  if (!prompt) return reply(400, { error: "empty prompt" });
+  let content = [{ type: "text", text: context ? `Context:\n${context}\n\nTask:\n${prompt}` : prompt }];
+  const pid = str(body && body.photoId, 64);
+  if (pid && ID_RE.test(pid)) {
+    const img = (await store().getWithMetadata(`thumb/${pid}`, { type: "arrayBuffer" })) || (await store().getWithMetadata(`img/${pid}`, { type: "arrayBuffer" }));
+    if (img && img.data) {
+      content = [{ type: "image", source: { type: "base64", media_type: (img.metadata && img.metadata.mime) || "image/jpeg", data: Buffer.from(img.data).toString("base64") } }, ...content];
+    }
+  }
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+    body: JSON.stringify({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 800,
+      system: "You help the owner of a Persian photography portfolio website. Answer in the language the user asks for, briefly and practically. For names and titles, give short, poetic, respectful options.",
+      messages: [{ role: "user", content }]
+    })
+  });
+  if (!r.ok) return reply(502, { error: "AI request failed" });
+  const j = await r.json();
+  const out = (j.content || []).filter(x => x.type === "text").map(x => x.text).join("").trim();
+  return reply(200, { text: out });
+}
+
 
 /* ---------- Router ---------- */
 export const handler = async event => {
@@ -445,6 +478,7 @@ export const handler = async event => {
 
     if (action === "login") return await loginLimited(body, event);
     if (action === "translate") return isAdmin(event) ? await translateText(body) : reply(401, { error: "unauthorized" });
+    if (action === "ai") return isAdmin(event) ? await aiAsk(body) : reply(401, { error: "unauthorized" });
 
     if (!isAdmin(event)) return reply(401, { error: "unauthorized" });
 
@@ -465,3 +499,4 @@ export const handler = async event => {
     return reply(500, { error: "server error", action, detail: String(e && e.message ? e.message : e).slice(0, 300) });
   }
 };
+

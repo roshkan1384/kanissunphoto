@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
 "use strict";
 
 const API = "/.netlify/functions/api";
@@ -473,6 +473,7 @@ async function persistSettings() {
 
 /* ---------- Navigation ---------- */
 function buildNav() {
+  ensureAiBtn();
   const items = [
     `<button data-nav="#home">${t("home")}</button>`,
     `<button data-nav="#about">${t("about")}</button>`
@@ -1903,6 +1904,72 @@ async function copyPhotoLink(id) {
   }
 }
 
+
+/* __KANISSUN_DUAL_AI_MERGED_V1__ */
+/* ---------- KanissunPhoto AI assistant (admin only) ---------- */
+function ensureAiBtn() {
+  let btn = document.getElementById("aiBtn");
+  if (!token) { if (btn) btn.remove(); const pn = document.getElementById("aiPanel"); if (pn) pn.remove(); return; }
+  if (btn) return;
+  btn = document.createElement("button");
+  btn.id = "aiBtn";
+  btn.className = "ai-btn";
+  btn.title = "دستیار هوش مصنوعی کانیسان";
+  btn.textContent = "✦ دستیار هوش مصنوعی کانیسان";
+  document.body.appendChild(btn);
+}
+function toggleAiPanel() {
+  let pn = document.getElementById("aiPanel");
+  if (pn) { pn.remove(); return; }
+  pn = document.createElement("div");
+  pn.id = "aiPanel";
+  pn.className = "ai-panel";
+  pn.innerHTML = `
+    <div class="ai-head"><b>دستیار هوش مصنوعی کانیسان</b><button id="aiClose" class="mini">✕</button></div>
+    <select id="aiTask">
+      <option value="name">نام‌گذاری عکس (فارسی و انگلیسی)</option>
+      <option value="caption">پیشنهاد کپشن کوتاه</option>
+      <option value="review">بازبینی فهرست عنوان‌ها</option>
+      <option value="free">درخواست آزاد</option>
+    </select>
+    <textarea id="aiPrompt" rows="3" placeholder="درخواست خود را بنویسید (برای «درخواست آزاد»)"></textarea>
+    <div class="ai-pickrow"><button id="aiPick" class="mini">انتخاب عکس از سایت</button><span id="aiChosen" class="ai-chosen"></span></div>
+    <div id="aiPickGrid" class="ai-grid" hidden></div>
+    <button id="aiGo" class="mini">اجرا</button>
+    <div id="aiOut" class="ai-out"></div>`;
+  document.body.appendChild(pn);
+}
+let aiPhotoId = "";
+function togglePhotoPicker() {
+  const g = $("#aiPickGrid");
+  if (!g.hidden) { g.hidden = true; return; }
+  const list = P.filter(p => p.type !== "text").sort(byOrder);
+  g.innerHTML = list.map(p => `<button class="ai-thumb" data-ai-photo="${esc(p.id)}" title="${esc(photoTitle(p))}"><img src="${imgUrl(p.id)}" alt=""></button>`).join("") || `<p class="muted">—</p>`;
+  g.hidden = false;
+}
+async function aiRun() {
+  const task = $("#aiTask").value;
+  const typed = ($("#aiPrompt").value || "").trim();
+  const out = $("#aiOut");
+  const ask = {
+    name: "Suggest a short, poetic Persian title and an English title for this photo, based on the context. Give 3 options.",
+    caption: "Suggest one short Persian caption (one line) for this photo, based on the context.",
+    review: "Review these photo titles and descriptions. Point out repeated, unclear or incorrect wording, and suggest fixes in Persian.",
+    free: typed
+  }[task];
+  if (!ask) return;
+  const context = metaId && P.find(p => p.id === metaId)
+    ? JSON.stringify({ title: P.find(p => p.id === metaId).title, desc: P.find(p => p.id === metaId).desc, keywords: P.find(p => p.id === metaId).keywords })
+    : (typed && task !== "free" ? typed : "");
+  out.textContent = "...";
+  try {
+    const res = await api("ai", { method: "POST", body: { prompt: ask, context, photoId: aiPhotoId || "" } });
+    out.textContent = res.text || "";
+  } catch (e) {
+    out.textContent = e.message || "AI error";
+  }
+}
+
 /* ---------- Add a main category ---------- */
 async function addMain() {
   const fa = ($("#nmFa").value || "").trim();
@@ -2450,6 +2517,12 @@ async function addTextAt(canvasEl, clientX, clientY) {
 }
 
 function onClick(e) {
+  if (e.target.id === "aiBtn") { toggleAiPanel(); return; }
+  if (e.target.id === "aiClose") { const pn = document.getElementById("aiPanel"); if (pn) pn.remove(); return; }
+  if (e.target.id === "aiGo") { aiRun(); return; }
+  if (e.target.id === "aiPick") { togglePhotoPicker(); return; }
+  const aiThumb = e.target.closest && e.target.closest("[data-ai-photo]");
+  if (aiThumb) { aiPhotoId = aiThumb.dataset.aiPhoto; const pp = P.find(x => x.id === aiPhotoId); $("#aiChosen").textContent = pp ? photoTitle(pp) : ""; $("#aiPickGrid").hidden = true; return; }
   if (e.target.id === "mTr") { trModal(); return; }
   const kwb = e.target.closest && e.target.closest("[data-kw]");
   if (kwb) { const k = kwb.dataset.kw; kwFilter = kwFilter === k ? null : k; render(); return; }
