@@ -1,4 +1,4 @@
-import { getStore } from "@netlify/blobs";
+import { connectLambda, getStore } from "@netlify/blobs";
 import crypto from "node:crypto";
 
 // Netlify function request/response bodies are limited to ~6 MB.
@@ -52,15 +52,7 @@ const DEFAULT_SETTINGS = {
   }
 };
 
-// Blobs connection: uses BLOBS_SITE_ID + BLOBS_TOKEN when set (manual config), otherwise Netlify's automatic context.
-const storeOpts = () => {
-  const siteID = globalThis.process?.env?.BLOBS_SITE_ID;
-  const token = globalThis.process?.env?.BLOBS_TOKEN;
-  return siteID && token
-    ? { name: "kanissun", consistency: "strong", siteID, token }
-    : { name: "kanissun", consistency: "strong" };
-};
-const store = () => getStore(storeOpts());
+const store = () => getStore({ name: "kanissun", consistency: "strong" });
 
 const reply = (statusCode, body, extraHeaders = {}) => ({
   statusCode,
@@ -443,6 +435,7 @@ export const handler = async event => {
   const action = q.action;
   const method = event.httpMethod;
   try {
+    connectLambda(event);
     if (method === "GET" && action === "public") return await publicData(isAdmin(event));
     if (method === "GET" && action === "image") return await getImage(q.id, q.trash === "1", isAdmin(event), q.size === "thumb");
     if (method !== "POST") return reply(405, { error: "method not allowed" });
